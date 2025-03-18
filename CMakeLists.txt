@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(dynamic_systems)
 
 set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -19,7 +19,8 @@ endif()
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 3.4 REQUIRED)
 find_package(polynomial_kit REQUIRED)
 
 # Dynamic systems base library configuration
@@ -30,16 +31,14 @@ add_library(dynamic_systems SHARED
   src/dynamic_systems/control/pid.cpp
   src/dynamic_systems/control/utils.cpp
   src/dynamic_systems/filters/jump_filter.cpp)
+add_library(dynamic_systems::dynamic_systems ALIAS dynamic_systems)
 target_compile_features(dynamic_systems PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 target_compile_definitions(dynamic_systems PRIVATE "DYNAMIC_SYSTEMS_BUILDING_LIBRARY")
 target_include_directories(dynamic_systems PUBLIC
-  ${EIGEN3_INCLUDE_DIR}
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_link_libraries(dynamic_systems
-  Eigen3::Eigen)
-
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 ament_target_dependencies(dynamic_systems
+  Eigen3
   polynomial_kit)
 
 # Libraries installation
@@ -48,7 +47,7 @@ install(
   DESTINATION include)
 install(
   TARGETS dynamic_systems
-  EXPORT dynamic_systemsTargets
+  EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -67,8 +66,10 @@ if(BUILD_TESTING)
 endif()
 
 # Export all dependencies and library targets for this package
-ament_export_targets(dynamic_systemsTargets HAS_LIBRARY_TARGET)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(eigen3_cmake_module)
 ament_export_dependencies(
+  Eigen3
   polynomial_kit)
 
 ament_package()
