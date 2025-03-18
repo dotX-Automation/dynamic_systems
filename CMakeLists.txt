@@ -37,8 +37,9 @@ target_compile_definitions(dynamic_systems PRIVATE "DYNAMIC_SYSTEMS_BUILDING_LIB
 target_include_directories(dynamic_systems PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+target_link_libraries(dynamic_systems
+  Eigen3::Eigen)
 ament_target_dependencies(dynamic_systems
-  Eigen3
   polynomial_kit)
 
 # Libraries installation
